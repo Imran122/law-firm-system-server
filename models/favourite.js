@@ -1,0 +1,20 @@
+const mongoose = require("mongoose");
+
+const DataSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    contributeDataId: {
+      type: mongoose.Types.ObjectId,
+      ref: "Contribute",
+      required: true,
+    },
+  },
+  { timestamps: true, versionKey: false }
+);
+
+const favourite = mongoose.model("favourite", DataSchema, "favourites");
+module.exports = favourite;
