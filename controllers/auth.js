@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const mailgun = require("mailgun-js");
+const nodemailer = require("nodemailer");
 const mg = mailgun({apiKey:  process.env.MAILGUN_API_KEY, domain:  process.env.MAILGUN_DOMAIN});
 // exports.signup = (req, res) => {
 
@@ -28,10 +29,10 @@ const mg = mailgun({apiKey:  process.env.MAILGUN_API_KEY, domain:  process.env.M
 //         });
 //     });
 // };
-exports.signup = (req, res) => {
+exports.signup =async (req, res) => {
   const { firstname, lastname, address, email, password } = req.body;
   let role='member';
-  User.findOne({ email }).exec((err, user) => {
+  User.findOne({ email }).exec(async(err, user) => {
     if (user) {
       return res.status(400).json({
         error: "Email is taken",
@@ -43,33 +44,37 @@ exports.signup = (req, res) => {
       process.env.JWT_ACCOUNT_ACTIVATION,
       { expiresIn: "10m" }
     );
-
-    const emailData = {
-      from: process.env.EMAIL_FROM,
-      to: email,
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      //host: "https://mail.google.com",
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: "itechverser22@gmail.com", // generated ethereal user
+        pass: "aewy jnpz stlw zpgl", // generated ethereal password
+      },
+    });
+    console.log("dsss");
+    console.log("user_data.email", email);
+    const emailData = await transporter.sendMail({
+      from: "itechverser22@gmail.com", // sender address
+      to: email, // list of receivers
       subject: `Account activation link`,
       html: `
-                <h1>Please use the following link to activate your account</h1>
-                <p>${process.env.CLIENT_URL}/auth/activate/${token}</p>
-                <hr />
-                <p>This email may contain sensetive information</p>
-                <p>${process.env.CLIENT_URL}</p>
-            `,
-    };
+        <h1>Please use the following link to activate your account</h1>
+        <p>${process.env.CLIENT_URL}/auth/activate/${token}</p>
+        <hr />
+        <p>This email may contain sensitive information</p>
+        <p>${process.env.CLIENT_URL}</p>
+      `,
+    });
+    
     console.log("emailData ",emailData);
 
-    mg.messages().send(emailData, function (error, body) {
-      console.log(error);
-      if (error) {
-        return res.json({
-          error
-        });
-      }
-      console.log(body);
-      return res.json({
-        message: `Email has been sent to ${email}. Follow the instruction to activate your account`,
-      });
+    return res.status(200).json({
+      message: `Email has been sent to ${email}. Follow the instruction to activate your account`,
     });
+    
   });
 };
 exports.accountActivation = (req, res) => {
