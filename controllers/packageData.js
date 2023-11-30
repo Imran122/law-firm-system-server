@@ -1,6 +1,7 @@
 const PackageData = require("../models/packageData");
 const User = require("../models/user");
 const mailgun = require("mailgun-js");
+const nodemailer = require("nodemailer");
 const mg = mailgun({
   apiKey: process.env.MAILGUN_API_KEY,
   domain: process.env.MAILGUN_DOMAIN,
@@ -63,8 +64,18 @@ exports.createPackages = async (req, res) => {
 
       const userDetails = await PackageData.findById(Pkgid).exec();
       const userEmail = userDetails.emailOfThePerson;
-
-      const emailData = {
+      let transporter = nodemailer.createTransport({
+        service: "gmail",
+        //host: "https://mail.google.com",
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: "itechverser22@gmail.com", // generated ethereal user
+          pass: "aewy jnpz stlw zpgl", // generated ethereal password
+        },
+      });
+      console.log("transporter ",transporter )
+      await transporter.sendMail({
         from: process.env.EMAIL_FROM,
         to: userEmail,
         subject: `custom package payment link`,
@@ -192,20 +203,10 @@ exports.createPackages = async (req, res) => {
                   <p>This email may contain sensetive information</p>
                   <p>${process.env.CLIENT_URL}</p>
               `,
-      };
+      });
 
-      mg.messages().send(emailData, function (error, body) {
-        console.log(error);
-        if (error) {
-          return res.json({
-            error,
-          });
-        }
-        console.log(body);
-        return res.json({
-          message: `Email has been sent to ${userEmail}. Follow the instruction to make payment for custom offer packages`,
-          data: data,
-        });
+      return res.status(200).json({
+        message: `Email has been sent to ${userEmail}. Follow the instruction for payment`,
       });
       /******************/
       /* 
