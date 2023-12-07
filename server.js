@@ -23,18 +23,30 @@ mongoose
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
-/* app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://law-firm-system-client.vercel.app');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-}); */
-const corsOptions ={
+app.use(); 
+/* const corsOptions ={
   origin:'https://law-firm-system-client.vercel.app', 
   credentials:true,            //access-control-allow-credentials:true
   optionSuccessStatus:200
-}
-app.use(cors(corsOptions));
+} */
+app.use(cors((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://law-firm-system-client.vercel.app');
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
+  if (req.method === 'OPTIONS') {
+    res.status(200).end()
+    return
+  }
+  
+  next();
+}));
 // routes attached with server
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api", require("./routes/auth"));
