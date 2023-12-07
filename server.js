@@ -23,7 +23,12 @@ mongoose
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(cors()); // allows all origins
-
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://law-firm-system-client.vercel.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 // routes attached with server
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api", require("./routes/auth"));
