@@ -8,7 +8,7 @@
 email: shadowvampire11@gmail.com </br>
 password: 12345678
 ## member credential:
-email: mdimranhossain0066@gmail.com  </br>
+email: mdimranhossain0066@gmail.com </br>
 password: 12345678
 
 ## admin credential:
